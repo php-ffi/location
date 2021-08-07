@@ -25,6 +25,7 @@ Checking the library for existence.
 use FFI\Location\Locator;
 
 $exists = Locator::exists('libGL.so');
+// Expected true in the case that the binary exists and false otherwise
 ```
 
 ### Binary Pathname
