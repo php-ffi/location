@@ -15,6 +15,10 @@ use FFI\Location\Internal\CacheReader;
 use FFI\Location\Internal\ConfigReader;
 use FFI\Location\Internal\ReaderInterface;
 
+/**
+ * @internal UnixAwareResolver is an internal library class, please do not use it in your code.
+ * @psalm-internal FFI\Location\Resolver
+ */
 abstract class UnixAwareResolver extends PathResolver
 {
     /**

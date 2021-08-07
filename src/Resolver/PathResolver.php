@@ -13,7 +13,7 @@ namespace FFI\Location\Resolver;
 
 /**
  * @internal PathResolver is an internal library class, please do not use it in your code.
- * @psalm-internal FFI\Location
+ * @psalm-internal FFI\Location\Resolver
  */
 abstract class PathResolver implements PathResolverInterface
 {
