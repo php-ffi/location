@@ -1,8 +1,22 @@
 {
     "name": "ffi/location",
+    "type": "library",
     "description": "PHP library for determining the physical location of binaries",
     "license": "MIT",
     "keywords": ["ffi", "bin", "location", "utility"],
+    "support": {
+        "source": "https://github.com/php-ffi/location",
+        "issues": "https://github.com/php-ffi/location/issues",
+        "docs": "https://github.com/php-ffi/location/blob/master/README.md"
+    },
+    "authors": [
+        {
+            "name": "Nesmeyanov Kirill",
+            "email": "nesk@xakep.ru",
+            "homepage": "https://serafimarts.ru",
+            "role": "maintainer"
+        }
+    ],
     "require": {
         "php": ">=7.4"
     },
@@ -13,7 +27,6 @@
     },
     "require-dev": {
         "vimeo/psalm": "^4.9",
-        "jetbrains/phpstorm-attributes": "^1.0",
         "phpunit/phpunit": "^9.0"
     },
     "autoload-dev": {
