@@ -11,14 +11,8 @@ use FFI\Location\Resolver\WindowsPathResolver;
 
 final class Locator
 {
-    /**
-     * @var PathResolverInterface|null
-     */
     private static ?PathResolverInterface $resolver = null;
 
-    /**
-     * @return PathResolverInterface
-     */
     private static function resolver(): PathResolverInterface
     {
         if (self::$resolver === null) {
@@ -37,19 +31,11 @@ final class Locator
         return self::$resolver;
     }
 
-    /**
-     * @param string $name
-     * @return bool
-     */
     public static function exists(string $name): bool
     {
         return self::pathname($name) !== null;
     }
 
-    /**
-     * @param string $name
-     * @return string|null
-     */
     public static function pathname(string $name): ?string
     {
         if (\is_file($name)) {
@@ -61,10 +47,6 @@ final class Locator
         return $resolver->resolve($name);
     }
 
-    /**
-     * @param string ...$libraries
-     * @return string|null
-     */
     public static function resolve(string ...$libraries): ?string
     {
         foreach ($libraries as $library) {

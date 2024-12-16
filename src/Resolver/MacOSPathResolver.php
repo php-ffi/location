@@ -5,14 +5,11 @@ declare(strict_types=1);
 namespace FFI\Location\Resolver;
 
 /**
- * @internal MacOSPathResolver is an internal library class, please do not use it in your code.
+ * @internal macOSPathResolver is an internal library class, please do not use it in your code
  * @psalm-internal FFI\Location
  */
 final class MacOSPathResolver extends UnixAwareResolver
 {
-    /**
-     * {@inheritDoc}
-     */
     protected function getLibDirectories(): iterable
     {
         yield \getcwd() ?: '.';

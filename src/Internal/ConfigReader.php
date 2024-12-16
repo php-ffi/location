@@ -5,46 +5,36 @@ declare(strict_types=1);
 namespace FFI\Location\Internal;
 
 /**
- * @internal ConfigReader is an internal library class, please do not use it in your code.
+ * @internal configReader is an internal library class, please do not use it in your code
  * @psalm-internal FFI\Location
  */
 final class ConfigReader implements ReaderInterface
 {
-    /**
-     * @var string
-     */
     private string $pathname;
 
-    /**
-     * @param string $pathname
-     */
     public function __construct(string $pathname)
     {
         $this->pathname = $pathname;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getIterator(): \Traversable
     {
         return $this->read($this->pathname);
     }
 
     /**
-     * @param string $pathname
      * @return \Traversable<array-key, string>
      */
     private function read(string $pathname): \Traversable
     {
-        if (! \is_file($pathname) || ! \is_readable($pathname)) {
+        if (!\is_file($pathname) || !\is_readable($pathname)) {
             return;
         }
 
         $fp = \fopen($pathname, 'rb');
 
-        while (! \feof($fp)) {
-            $line = (string)\fgets($fp);
+        while (!\feof($fp)) {
+            $line = (string) \fgets($fp);
 
             switch (true) {
                 case \str_starts_with($line, 'include'):

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace FFI\Location\Internal;
 
 /**
- * @internal CacheReader is an internal library class, please do not use it in your code.
+ * @internal cacheReader is an internal library class, please do not use it in your code
  * @psalm-internal FFI\Location
  */
 final class CacheReader implements ReaderInterface
@@ -20,36 +20,27 @@ final class CacheReader implements ReaderInterface
      */
     private array $paths = [];
 
-    /**
-     * @var string
-     */
     private string $pathname;
 
-    /**
-     * @param string $pathname
-     */
     public function __construct(string $pathname)
     {
         $this->pathname = $pathname;
     }
 
-    /**
-     * @return string
-     */
     private function exec(): string
     {
-        if (! \is_file($this->pathname)) {
+        if (!\is_file($this->pathname)) {
             return '';
         }
 
-        if (! \function_exists('\\shell_exec')) {
+        if (!\function_exists('\\shell_exec')) {
             return '';
         }
 
         /** @psalm-suppress ForbiddenCode */
         $output = @\shell_exec(\sprintf(self::EXEC_CMD, \escapeshellarg($this->pathname)));
 
-        if (! \is_string($output)) {
+        if (!\is_string($output)) {
             return '';
         }
 
@@ -67,7 +58,7 @@ final class CacheReader implements ReaderInterface
             $directory = \dirname($library);
             $isDirectory = $directory !== '.' && $directory !== '';
 
-            if ($isDirectory && ! \in_array($directory, $paths, true)) {
+            if ($isDirectory && !\in_array($directory, $paths, true)) {
                 $paths[] = $directory;
             }
         }
@@ -75,12 +66,9 @@ final class CacheReader implements ReaderInterface
         return $paths;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getIterator(): \Traversable
     {
-        if (! \is_file($this->pathname)) {
+        if (!\is_file($this->pathname)) {
             return new \EmptyIterator();
         }
 

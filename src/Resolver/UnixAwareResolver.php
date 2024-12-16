@@ -9,7 +9,7 @@ use FFI\Location\Internal\ConfigReader;
 use FFI\Location\Internal\ReaderInterface;
 
 /**
- * @internal UnixAwareResolver is an internal library class, please do not use it in your code.
+ * @internal unixAwareResolver is an internal library class, please do not use it in your code
  * @psalm-internal FFI\Location\Resolver
  */
 abstract class UnixAwareResolver extends PathResolver
@@ -35,9 +35,6 @@ abstract class UnixAwareResolver extends PathResolver
         yield from $this->linkerDirectories;
     }
 
-    /**
-     * @return ReaderInterface|null
-     */
     private function getReader(): ?ReaderInterface
     {
         if (\is_file('/etc/ld.so.conf')) {
