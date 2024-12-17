@@ -31,15 +31,23 @@ final class ConfigReader implements ReaderInterface
             return;
         }
 
-        $fp = \fopen($pathname, 'rb');
+        $fp = @\fopen($pathname, 'rb');
+
+        if ($fp === false) {
+            return;
+        }
 
         while (!\feof($fp)) {
             $line = (string) \fgets($fp);
 
             switch (true) {
                 case \str_starts_with($line, 'include'):
-                    foreach (\glob(\trim(\substr($line, 8))) as $config) {
-                        yield from $this->read($config);
+                    $references = \glob(\trim((string) \substr($line, 8)));
+
+                    if (\is_iterable($references)) {
+                        foreach ($references as $config) {
+                            yield from $this->read($config);
+                        }
                     }
                     break;
 

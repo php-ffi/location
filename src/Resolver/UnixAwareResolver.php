@@ -9,24 +9,30 @@ use FFI\Location\Internal\ConfigReader;
 use FFI\Location\Internal\ReaderInterface;
 
 /**
- * @internal unixAwareResolver is an internal library class, please do not use it in your code
- * @psalm-internal FFI\Location\Resolver
+ * @internal this is an internal library class, please do not use it in your code
+ * @psalm-internal FFI\Location
  */
 abstract class UnixAwareResolver extends PathResolver
 {
     /**
      * Memoized linker directories.
      *
-     * @var array<string>
+     * @var array<array-key, string>
      */
     private array $linkerDirectories = [];
 
     /**
-     * @return iterable<string>
+     * @return iterable<array-key, string>
      */
     protected function getLinkerDirectories(): iterable
     {
-        if ($this->linkerDirectories === [] && ($reader = $this->getReader())) {
+        if ($this->linkerDirectories === []) {
+            $reader = $this->getReader();
+
+            if ($reader === null) {
+                return [];
+            }
+
             foreach ($reader as $directory) {
                 $this->linkerDirectories[] = $directory;
             }

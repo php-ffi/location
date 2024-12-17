@@ -13,7 +13,7 @@
         {
             "name": "Nesmeyanov Kirill",
             "email": "nesk@xakep.ru",
-            "homepage": "https://serafimarts.ru",
+            "homepage": "https://nesk.me",
             "role": "maintainer"
         }
     ],
@@ -26,9 +26,11 @@
         }
     },
     "require-dev": {
-        "vimeo/psalm": "^5.4",
         "phpunit/phpunit": "^9.5",
-        "squizlabs/php_codesniffer": "^3.7"
+        "friendsofphp/php-cs-fixer": "^3.53",
+        "phpstan/phpstan": "^2.0",
+        "phpstan/phpstan-deprecation-rules": "^2.0",
+        "phpstan/phpstan-strict-rules": "^2.0"
     },
     "autoload-dev": {
         "psr-4": {
@@ -36,8 +38,21 @@
         }
     },
     "config": {
-        "sort-packages": true,
-        "optimize-autoloader": true
+        "optimize-autoloader": true,
+        "preferred-install": {
+            "*": "dist"
+        },
+        "sort-packages": true
+    },
+    "scripts": {
+        "test": ["@test:unit"],
+        "test:unit": "phpunit --testdox --testsuite=unit",
+        "linter": "@linter:check",
+        "linter:check": "phpstan analyse --configuration phpstan.neon",
+        "linter:baseline": "@linter:check -- --generate-baseline",
+        "phpcs": "@phpcs:check",
+        "phpcs:check": "@phpcs:fix -- --dry-run",
+        "phpcs:fix": "php-cs-fixer fix --config=.php-cs-fixer.php --allow-risky=yes --verbose --diff"
     },
     "extra": {
         "branch-alias": {

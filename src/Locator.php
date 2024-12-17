@@ -36,9 +36,23 @@ final class Locator
         return self::pathname($name) !== null;
     }
 
+    /**
+     * @return non-empty-string|null
+     */
     public static function pathname(string $name): ?string
     {
+        if ($name === '') {
+            return null;
+        }
+
         if (\is_file($name)) {
+            /**
+             * Allow non-strict short ternary operator
+             *
+             * @var non-empty-string
+             *
+             * @phpstan-ignore ternary.shortNotAllowed
+             */
             return \realpath($name) ?: $name;
         }
 
@@ -47,10 +61,15 @@ final class Locator
         return $resolver->resolve($name);
     }
 
+    /**
+     * @return non-empty-string|null
+     */
     public static function resolve(string ...$libraries): ?string
     {
         foreach ($libraries as $library) {
-            if (($pathname = self::pathname($library)) !== null) {
+            $pathname = self::pathname($library);
+
+            if ($pathname !== null) {
                 return $pathname;
             }
         }
