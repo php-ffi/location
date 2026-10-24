@@ -7,6 +7,7 @@ namespace FFI\Location\Resolver;
 use FFI\Location\Resolver\Directory\ApplicationDirectory;
 use FFI\Location\Resolver\Directory\EnvironmentDirectories;
 use FFI\Location\Resolver\Directory\FixedDirectories;
+use FFI\Location\Resolver\Directory\HomeDirectories;
 use FFI\Location\Resolver\Directory\LinkerDirectories;
 use FFI\Location\Resolver\Directory\LinkerDirectories\CacheReader;
 use FFI\Location\Resolver\Directory\LinkerDirectories\ConfigReader;
@@ -59,6 +60,7 @@ final class PathResolverFactory
             new UnixNaming(),
             new EnvironmentDirectories('DYLD_LIBRARY_PATH'),
             new EnvironmentDirectories('DYLD_FALLBACK_LIBRARY_PATH'),
+            new HomeDirectories('lib'),
             // Default directories, including the Homebrew prefixes of Apple Silicon and Intel
             new FixedDirectories('/usr/local/lib', '/usr/lib', '/opt/homebrew/lib'),
             // Fallback

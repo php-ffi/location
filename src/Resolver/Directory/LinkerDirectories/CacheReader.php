@@ -52,8 +52,10 @@ final class CacheReader implements ReaderInterface
         $buffer = new Buffer($contents);
 
         foreach ($this->formats as $format) {
-            if ($format->supports($buffer)) {
-                yield from $this->readDirectories($format->getLibraries($buffer));
+            $libraries = $format->findLibraries($buffer);
+
+            if ($libraries !== null) {
+                yield from $this->readDirectories($libraries);
 
                 return;
             }

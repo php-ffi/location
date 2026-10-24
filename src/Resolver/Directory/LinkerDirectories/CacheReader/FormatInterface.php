@@ -10,10 +10,10 @@ namespace FFI\Location\Resolver\Directory\LinkerDirectories\CacheReader;
  */
 interface FormatInterface
 {
-    public function supports(Buffer $buffer): bool;
-
     /**
-     * @return iterable<array-key, string>
+     * Returns pathnames of the libraries listed in the cache, or `null` if the cache is of another format.
+     *
+     * @return iterable<array-key, string>|null
      */
-    public function getLibraries(Buffer $buffer): iterable;
+    public function findLibraries(Buffer $buffer): ?iterable;
 }

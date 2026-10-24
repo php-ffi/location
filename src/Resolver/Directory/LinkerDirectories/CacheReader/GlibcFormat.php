@@ -41,17 +41,12 @@ final class GlibcFormat implements FormatInterface
      */
     private const VALUE_OFFSET = 8;
 
-    public function supports(Buffer $buffer): bool
-    {
-        return $buffer->findOffset(self::SIGNATURE) !== null;
-    }
-
-    public function getLibraries(Buffer $buffer): iterable
+    public function findLibraries(Buffer $buffer): ?iterable
     {
         $start = $buffer->findOffset(self::SIGNATURE);
 
         if ($start === null) {
-            return [];
+            return null;
         }
 
         return $buffer->readReferences(

@@ -41,13 +41,12 @@ final class LegacyFormat implements FormatInterface
      */
     private const VALUE_OFFSET = 8;
 
-    public function supports(Buffer $buffer): bool
+    public function findLibraries(Buffer $buffer): ?iterable
     {
-        return $buffer->hasPrefix(self::SIGNATURE);
-    }
+        if (!$buffer->hasPrefix(self::SIGNATURE)) {
+            return null;
+        }
 
-    public function getLibraries(Buffer $buffer): iterable
-    {
         $count = $buffer->readInt(self::COUNT_OFFSET);
 
         return $buffer->readReferences(
