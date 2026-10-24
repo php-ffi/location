@@ -11,8 +11,9 @@ namespace FFI\Location\Resolver;
 interface PathResolverInterface
 {
     /**
-     * @param non-empty-string $name
+     * Returns the real pathname of the library, or `null` if it is not found.
      *
+     * @param non-empty-string $name
      * @return non-empty-string|null
      */
     public function resolve(string $name): ?string;

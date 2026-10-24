@@ -1,4 +1,4 @@
-# Bin Locator
+# Library Location Resolver
 
 <p align="center">
     <a href="https://packagist.org/packages/ffi/location"><img src="https://poser.pugx.org/ffi/location/require/php?style=for-the-badge" alt="PHP 7.4+"></a>
@@ -19,8 +19,8 @@ Library for searching binary files in the operating system.
 
 ## Installation
 
-Library is available as composer repository and can be installed using the 
-following command in a root of your project.
+Library is available as a Composer repository and can be installed using the 
+following command in the root of your project.
 
 ```sh
 $ composer require ffi/location

@@ -4,31 +4,20 @@ declare(strict_types=1);
 
 namespace FFI\Location;
 
-use FFI\Location\Resolver\LinuxPathResolver;
-use FFI\Location\Resolver\MacOSPathResolver;
+use FFI\Location\Resolver\PathResolverFactory;
 use FFI\Location\Resolver\PathResolverInterface;
-use FFI\Location\Resolver\WindowsPathResolver;
 
+/**
+ * Locates binary libraries in the order of the dynamic linker used by `FFI::cdef()`.
+ */
 final class Locator
 {
     private static ?PathResolverInterface $resolver = null;
 
-    private static function resolver(): PathResolverInterface
+    private static function getResolver(): PathResolverInterface
     {
-        if (self::$resolver === null) {
-            switch (\PHP_OS_FAMILY) {
-                case 'Windows':
-                    return self::$resolver = new WindowsPathResolver();
-
-                case 'Darwin':
-                    return self::$resolver = new MacOSPathResolver();
-
-                default:
-                    return self::$resolver = new LinuxPathResolver();
-            }
-        }
-
-        return self::$resolver;
+        return self::$resolver
+            ??= PathResolverFactory::create(\PHP_OS_FAMILY);
     }
 
     public static function exists(string $name): bool
@@ -37,31 +26,24 @@ final class Locator
     }
 
     /**
+     * Returns the real pathname of the library, or `null` if it is not found.
+     *
      * @return non-empty-string|null
      */
     public static function pathname(string $name): ?string
     {
-        if ($name === '') {
+        // A name cannot be empty or contain a null byte
+        if ($name === '' || \strpos($name, "\0") !== false) {
             return null;
         }
 
-        if (\is_file($name)) {
-            /**
-             * Allow non-strict short ternary operator
-             *
-             * @var non-empty-string
-             *
-             * @phpstan-ignore ternary.shortNotAllowed
-             */
-            return \realpath($name) ?: $name;
-        }
-
-        $resolver = self::resolver();
-
-        return $resolver->resolve($name);
+        return self::getResolver()
+            ->resolve($name);
     }
 
     /**
+     * Returns the pathname of the first found library, or `null` if none is found.
+     *
      * @return non-empty-string|null
      */
     public static function resolve(string ...$libraries): ?string

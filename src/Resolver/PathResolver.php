@@ -4,87 +4,81 @@ declare(strict_types=1);
 
 namespace FFI\Location\Resolver;
 
+use FFI\Location\Resolver\Directory\DirectoryProviderInterface;
+use FFI\Location\Resolver\Naming\NamingInterface;
+
 /**
+ * Searches the library in the directories of the providers, in order of their priority.
+ *
  * @internal this is an internal library class, please do not use it in your code
  * @psalm-internal FFI\Location
  */
-abstract class PathResolver implements PathResolverInterface
+final class PathResolver implements PathResolverInterface
 {
     /**
-     * @var array<non-empty-string, non-empty-string|null>
+     * @readonly
      */
-    private array $paths = [];
+    private NamingInterface $naming;
 
     /**
-     * @return iterable<array-key, string>
+     * @readonly
+     *
+     * @var list<DirectoryProviderInterface>
      */
-    abstract protected function getLibDirectories(): iterable;
+    private array $providers;
+
+    public function __construct(NamingInterface $naming, DirectoryProviderInterface ...$providers)
+    {
+        $this->naming = $naming;
+        $this->providers = \array_values($providers);
+    }
 
     public function resolve(string $name): ?string
     {
-        if (!isset($this->paths[$name])) {
-            foreach ($this->getLibDirectories() as $directory) {
-                $pathname = $directory . '/' . $name;
+        foreach ($this->getCandidates($name) as $pathname) {
+            if (\is_file($pathname)) {
+                $real = \realpath($pathname);
 
-                if (\is_file($pathname)) {
-                    // Allow non-strict short ternary operator
-                    // @phpstan-ignore ternary.shortNotAllowed
-                    return $this->paths[$name] = \realpath($pathname) ?: $pathname;
-                }
+                return $real === false ? $pathname : $real;
             }
-
-            return $this->paths[$name] = null;
-        }
-
-        return $this->paths[$name];
-    }
-
-    /**
-     * @param non-empty-string $env
-     * @param non-empty-string $delimiter
-     *
-     * @return iterable<array-key, non-empty-string>
-     */
-    protected function getEnvDirectories(string $env, string $delimiter = ':'): iterable
-    {
-        $value = $this->fetchEnvVariable($env);
-
-        if ($value === null || $value === '') {
-            return [];
-        }
-
-        foreach (\explode($delimiter, $value) as $path) {
-            $trimmed = \trim($path);
-
-            if ($trimmed !== '') {
-                yield $trimmed;
-            }
-        }
-    }
-
-    /**
-     * @param non-empty-string $variable
-     */
-    private function fetchEnvVariable(string $variable): ?string
-    {
-        $value = $_ENV[$variable] ?? null;
-
-        if (\is_string($value)) {
-            return $value;
-        }
-
-        $value = $_SERVER[$variable] ?? null;
-
-        if (\is_string($value)) {
-            return $value;
-        }
-
-        $value = \getenv($variable);
-
-        if (\is_string($value)) {
-            return $value;
         }
 
         return null;
+    }
+
+    /**
+     * @param non-empty-string $name
+     * @return \Generator<int, non-empty-string>
+     */
+    private function getCandidates(string $name): \Generator
+    {
+        $files = $this->naming->getFiles($name);
+
+        if ($this->naming->isPath($name)) {
+            yield from $files;
+
+            return;
+        }
+
+        foreach ($this->getDirectories() as $directory) {
+            foreach ($files as $file) {
+                yield $directory . '/' . $file;
+            }
+        }
+    }
+
+    /**
+     * @return \Generator<int, non-empty-string>
+     */
+    private function getDirectories(): \Generator
+    {
+        foreach ($this->providers as $provider) {
+            foreach ($provider->getDirectories() as $directory) {
+                // Skips empty directories
+                if ($directory !== '') {
+                    yield $directory;
+                }
+            }
+        }
     }
 }
