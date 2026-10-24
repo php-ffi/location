@@ -12,39 +12,43 @@ use PHPUnit\Framework\Attributes\CoversClass;
 #[CoversClass(GlibcFormat::class)]
 final class GlibcFormatTest extends TestCase
 {
-    public function testGlibcCacheIsSupported(): void
-    {
-        $buffer = new Buffer(CacheBuilder::createGlibcCache(['/usr/lib/libfoo.so']));
-
-        self::assertTrue((new GlibcFormat())->supports($buffer));
-    }
-
-    public function testCompatCacheIsSupported(): void
-    {
-        $buffer = new Buffer(CacheBuilder::createGlibcCache([], "ld.so-1.7.0\0\0\0\0\0"));
-
-        self::assertTrue((new GlibcFormat())->supports($buffer));
-    }
-
-    public function testLegacyCacheIsNotSupported(): void
-    {
-        $buffer = new Buffer(CacheBuilder::createLegacyCache(['/usr/lib/libfoo.so']));
-
-        self::assertFalse((new GlibcFormat())->supports($buffer));
-    }
-
     public function testLibrariesAreRead(): void
     {
         $buffer = new Buffer(CacheBuilder::createGlibcCache(['libfoo.so', '/usr/lib/libfoo.so', '/opt/libbar.so']));
 
-        self::assertSame(
-            ['libfoo.so', '/usr/lib/libfoo.so', '/opt/libbar.so'],
-            [...(new GlibcFormat())->getLibraries($buffer)],
-        );
+        $libraries = (new GlibcFormat())->findLibraries($buffer);
+
+        self::assertNotNull($libraries);
+        self::assertSame(['libfoo.so', '/usr/lib/libfoo.so', '/opt/libbar.so'], [...$libraries]);
     }
 
-    public function testUnsupportedCacheHasNoLibraries(): void
+    public function testCompatCacheIsRead(): void
     {
-        self::assertSame([], [...(new GlibcFormat())->getLibraries(new Buffer('unknown'))]);
+        $buffer = new Buffer(CacheBuilder::createGlibcCache(['/usr/lib/libfoo.so'], "ld.so-1.7.0\0\0\0\0\0"));
+
+        $libraries = (new GlibcFormat())->findLibraries($buffer);
+
+        self::assertNotNull($libraries);
+        self::assertSame(['/usr/lib/libfoo.so'], [...$libraries]);
+    }
+
+    public function testEmptyCacheHasNoLibraries(): void
+    {
+        $libraries = (new GlibcFormat())->findLibraries(new Buffer(CacheBuilder::createGlibcCache([])));
+
+        self::assertNotNull($libraries);
+        self::assertSame([], [...$libraries]);
+    }
+
+    public function testLegacyCacheIsNotRecognized(): void
+    {
+        $buffer = new Buffer(CacheBuilder::createLegacyCache(['/usr/lib/libfoo.so']));
+
+        self::assertNull((new GlibcFormat())->findLibraries($buffer));
+    }
+
+    public function testUnknownDataIsNotRecognized(): void
+    {
+        self::assertNull((new GlibcFormat())->findLibraries(new Buffer('unknown')));
     }
 }

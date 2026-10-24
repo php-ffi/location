@@ -72,12 +72,7 @@ final class CacheReaderTest extends TestCase
     public function testFirstSupportingFormatIsUsed(): void
     {
         $first = new class implements FormatInterface {
-            public function supports(Buffer $buffer): bool
-            {
-                return true;
-            }
-
-            public function getLibraries(Buffer $buffer): iterable
+            public function findLibraries(Buffer $buffer): ?iterable
             {
                 return ['/first/libfoo.so'];
             }

@@ -115,6 +115,21 @@ final class PathResolverFactoryTest extends TestCase
         self::assertSame($secondFile, $resolver->resolve($secondName));
     }
 
+    public function testMacOSSearchesLibDirectoryOfHome(): void
+    {
+        $this->skipOnWindows();
+
+        $home = $this->createDirectory();
+        $name = $this->createUniqueName('.dylib');
+        $file = $this->createFile($home . '/lib/' . $name);
+
+        $this->setEnv('HOME', $home);
+        $this->setEnv('DYLD_LIBRARY_PATH', null);
+        $this->setEnv('DYLD_FALLBACK_LIBRARY_PATH', null);
+
+        self::assertSame($file, PathResolverFactory::create('Darwin')->resolve($name));
+    }
+
     public function testWindowsSearchesPathVariable(): void
     {
         $first = $this->createDirectory();
