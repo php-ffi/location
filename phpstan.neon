@@ -6,7 +6,7 @@ parameters:
   level: max
   phpVersion:
     min: 70400
-    max: 80500
+    max: 80600
   strictRules:
     allRules: true
   paths:
