@@ -1,5 +1,9 @@
-.idea/
-vendor/
+# IDE
+/.idea/
 
-composer.lock
+# Composer
+/composer.lock
+/vendor/
+
+# Testing
 .phpunit.result.cache
