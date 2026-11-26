@@ -263,15 +263,6 @@ return (new Config())
         'unary_operator_spaces' => true,
         'whitespace_after_comma_in_array' => true,
         'yoda_style' => false,
-        // PHP 7.4 does not allow a trailing comma in a parameter list nor "match"
-        // expressions, which the PER-CS 3.0 set would otherwise require.
-        'trailing_comma_in_multiline' => [
-            'elements' => [
-                'arguments',
-                'array_destructuring',
-                'arrays',
-            ],
-        ],
     ])
     ->setCacheFile(__DIR__ . '/vendor/.cache.php-cs-fixer')
     ->setFinder($files);

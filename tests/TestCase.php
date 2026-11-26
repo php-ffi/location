@@ -11,12 +11,7 @@ abstract class TestCase extends BaseTestCase
     /**
      * @var list<string>
      */
-    private array $files = [];
-
-    /**
-     * @var list<string>
-     */
-    private array $directories = [];
+    private array $paths = [];
 
     /**
      * @var array<string, string|false>
@@ -40,12 +35,8 @@ abstract class TestCase extends BaseTestCase
             \putenv($value === false ? $name : $name . '=' . $value);
         }
 
-        foreach ($this->files as $file) {
-            @\unlink($file);
-        }
-
-        foreach (\array_reverse($this->directories) as $directory) {
-            @\rmdir($directory);
+        foreach (\array_reverse($this->paths) as $path) {
+            \is_dir($path) ? @\rmdir($path) : @\unlink($path);
         }
 
         parent::tearDown();
@@ -56,63 +47,63 @@ abstract class TestCase extends BaseTestCase
      */
     protected function createDirectory(): string
     {
-        $pathname = \sys_get_temp_dir() . \DIRECTORY_SEPARATOR . 'ffi-location-' . \bin2hex(\random_bytes(6));
+        $directory = \sys_get_temp_dir() . \DIRECTORY_SEPARATOR . 'ffi-location-' . \bin2hex(\random_bytes(6));
+        \mkdir($directory);
 
-        \mkdir($pathname);
-
-        $this->directories[] = $pathname;
-
-        return (string) \realpath($pathname);
+        return $this->paths[] = (string) \realpath($directory);
     }
 
     /**
-     * Creates a file that is removed after the test, and returns its real pathname.
+     * Creates a file that is removed after the test.
      */
-    protected function createFile(string $pathname, string $contents = ''): string
+    protected function createFile(string $pathname, string $contents): string
     {
-        $directory = \dirname($pathname);
-
-        if (!\is_dir($directory)) {
-            \mkdir($directory, 0777, true);
-            $this->directories[] = $directory;
-        }
-
         \file_put_contents($pathname, $contents);
 
-        $this->files[] = $pathname;
-
-        return (string) \realpath($pathname);
+        return $this->paths[] = $pathname;
     }
 
     /**
-     * Schedules the removal of a file that is created by the test.
+     * Sets the environment variable until the end of the test.
      */
-    protected function trackFile(string $pathname): void
-    {
-        $this->files[] = $pathname;
-    }
-
-    /**
-     * Sets (or unsets, if the value is `null`) the environment variable until the end of the test.
-     */
-    protected function setEnv(string $name, ?string $value): void
+    protected function setEnvironment(string $name, ?string $value): void
     {
         if (!\array_key_exists($name, $this->environment)) {
-            $this->environment[$name] = \getenv($name);
+            $this->environment[$name] = \getenv($name, true);
         }
 
         \putenv($value === null ? $name : $name . '=' . $value);
     }
 
-    protected function createUniqueName(string $suffix = '.lib'): string
+    /**
+     * The beginning of an ELF object of the given class, `1` for 32 bit and `2` for 64 bit.
+     */
+    protected static function getElf(int $class): string
     {
-        return 'ffi-location-' . \bin2hex(\random_bytes(6)) . $suffix;
+        return "\x7FELF" . \chr($class) . \str_repeat("\0", 59);
     }
 
-    protected function skipOnWindows(): void
+    /**
+     * The ELF object of the class of the PHP process.
+     */
+    protected static function getNativeElf(): string
     {
-        if (\PHP_OS_FAMILY === 'Windows') {
-            self::markTestSkipped('Unix-style paths are not supported on Windows.');
-        }
+        return self::getElf(\PHP_INT_SIZE === 8 ? 2 : 1);
+    }
+
+    /**
+     * The beginning of a PE image with the given `Machine` field.
+     */
+    protected static function getPe(int $machine): string
+    {
+        return 'MZ' . \str_repeat("\0", 0x3A) . \pack('V', 0x40) . "PE\0\0" . \pack('v', $machine) . \str_repeat("\0", 18);
+    }
+
+    /**
+     * The PE image of the architecture of the PHP process.
+     */
+    protected static function getNativePe(): string
+    {
+        return self::getPe(\PHP_INT_SIZE === 8 ? 0x8664 : 0x014C);
     }
 }
