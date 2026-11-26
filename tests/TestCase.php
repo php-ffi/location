@@ -29,7 +29,10 @@ abstract class TestCase extends BaseTestCase
 
     protected function tearDown(): void
     {
-        \chdir($this->workingDirectory);
+        // Empty when the test is skipped before the setup
+        if ($this->workingDirectory !== '') {
+            \chdir($this->workingDirectory);
+        }
 
         foreach ($this->environment as $name => $value) {
             \putenv($value === false ? $name : $name . '=' . $value);
