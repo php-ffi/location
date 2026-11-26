@@ -45,9 +45,11 @@
     },
     "scripts": {
         "test": [
-            "@test:unit"
+            "@test:unit",
+            "@test:integration"
         ],
         "test:unit": "phpunit --testsuite unit --testdox",
+        "test:integration": "phpunit --testsuite integration --testdox",
         "linter:check": "phpstan analyse --configuration phpstan.neon --memory-limit 256M",
         "linter:baseline": "@linter:check --generate-baseline",
         "phpcs:check": "@phpcs:fix --dry-run",

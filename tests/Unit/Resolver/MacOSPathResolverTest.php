@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FFI\Location\Tests\Resolver;
+namespace FFI\Location\Tests\Unit\Resolver;
 
 use FFI\Location\Bitness;
 use FFI\Location\Resolver\MacOSPathResolver;
@@ -64,6 +64,26 @@ final class MacOSPathResolverTest extends TestCase
         $this->setEnvironment('DYLD_LIBRARY_PATH', $text . ':' . $library);
 
         self::assertSame($library . '/libx.dylib', (new MacOSPathResolver())->resolve('libx.dylib', Bitness::Auto));
+    }
+
+    public function testDefaultFallbackDirectoriesAreUsedWhenFallbackPathIsNotSet(): void
+    {
+        $directory = $this->createDirectory();
+        $method = new \ReflectionMethod(MacOSPathResolver::class, 'getDirectories');
+
+        $this->setEnvironment('DYLD_LIBRARY_PATH', null);
+        $this->setEnvironment('DYLD_FALLBACK_LIBRARY_PATH', null);
+        self::assertSame(['/usr/local/lib', '/usr/lib'], \iterator_to_array(
+            $method->invoke(new MacOSPathResolver(), 'libx.dylib'),
+            false,
+        ));
+
+        // A set fallback path replaces the default directories
+        $this->setEnvironment('DYLD_FALLBACK_LIBRARY_PATH', $directory);
+        self::assertSame([$directory], \iterator_to_array(
+            $method->invoke(new MacOSPathResolver(), 'libx.dylib'),
+            false,
+        ));
     }
 
     public function testWorkingDirectoryIsNotSearched(): void

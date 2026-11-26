@@ -34,6 +34,13 @@ final class LinuxPathResolver extends PathResolver
      */
     private ?array $cache = null;
 
+    public function __construct(
+        /**
+         * Pathname of the linker cache.
+         */
+        private readonly string $linkerCache = self::LINKER_CACHE,
+    ) {}
+
     protected function getDirectories(string $file): iterable
     {
         // The glibc accepts a colon or a semicolon as a delimiter
@@ -69,7 +76,7 @@ final class LinuxPathResolver extends PathResolver
     private function getCacheDirectories(string $file): array
     {
         if ($this->cache === null) {
-            $this->cache = self::readCache();
+            $this->cache = $this->readCache();
         }
 
         return $this->cache[$file] ?? [];
@@ -83,9 +90,9 @@ final class LinuxPathResolver extends PathResolver
      *
      * @return array<non-empty-string, list<non-empty-string>>
      */
-    private static function readCache(): array
+    private function readCache(): array
     {
-        $contents = @\file_get_contents(self::LINKER_CACHE, false, null, 0, self::MAX_CACHE_SIZE);
+        $contents = @\file_get_contents($this->linkerCache, false, null, 0, self::MAX_CACHE_SIZE);
 
         if (!\is_string($contents)) {
             return [];

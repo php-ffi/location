@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FFI\Location\Tests\Resolver;
+namespace FFI\Location\Tests\Unit\Resolver;
 
 use FFI\Location\Bitness;
 use FFI\Location\Resolver\WindowsPathResolver;
@@ -25,7 +25,11 @@ final class WindowsPathResolverTest extends TestCase
     {
         $resolver = new WindowsPathResolver();
 
-        self::assertSame($resolver->resolve('kernel32.dll', Bitness::Auto), $resolver->resolve('kernel32', Bitness::Auto));
+        $pathname = $resolver->resolve('kernel32', Bitness::Auto);
+
+        self::assertNotNull($pathname);
+        self::assertStringEndsWith('\\kernel32.dll', \strtolower($pathname));
+        self::assertSame($pathname, $resolver->resolve('kernel32.dll', Bitness::Auto));
         self::assertNull($resolver->resolve('kernel32.', Bitness::Auto));
     }
 

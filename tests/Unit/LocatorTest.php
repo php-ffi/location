@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FFI\Location\Tests;
+namespace FFI\Location\Tests\Unit;
 
 use FFI\Location\Locator;
+use FFI\Location\Tests\TestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(Locator::class)]

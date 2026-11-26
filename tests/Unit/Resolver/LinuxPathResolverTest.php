@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FFI\Location\Tests\Resolver;
+namespace FFI\Location\Tests\Unit\Resolver;
 
 use FFI\Location\Bitness;
 use FFI\Location\Resolver\LinuxPathResolver;
@@ -83,14 +83,30 @@ final class LinuxPathResolverTest extends TestCase
         self::assertStringEndsWith('/./libx.so', (string) (new LinuxPathResolver())->resolve('./libx.so', Bitness::Auto));
     }
 
-    public function testLibraryIsFoundInLinkerCache(): void
+    public function testLibraryIsLookedUpInLinkerCacheByName(): void
     {
-        if (\PHP_OS_FAMILY !== 'Linux' || !\is_file('/etc/ld.so.cache')) {
-            self::markTestSkipped('Requires the glibc linker cache');
-        }
+        [$cached, $other, $directory] = [$this->createDirectory(), $this->createDirectory(), $this->createDirectory()];
+        $this->createFile($cached . '/libcached.so', self::getNativeElf());
+        $this->createFile($other . '/libother.so', self::getNativeElf());
+        $this->createFile($other . '/libcached.so', self::getNativeElf());
+
+        // The pathnames are null-terminated strings among binary data, `/ab` is too short to be one
+        $cache = $this->createFile($directory . '/ld.so.cache', "glibc-ld.so.cache1.1\x01\x02\0/ab\0"
+            . $cached . "/libcached.so\0\x7F\x03" . $other . "/libother.so\0");
 
         $this->setEnvironment('LD_LIBRARY_PATH', null);
+        $resolver = new LinuxPathResolver($cache);
 
-        self::assertNotNull((new LinuxPathResolver())->resolve('libc.so.6', Bitness::Auto));
+        // Only the directory where the cache has the library, not every directory of the cache
+        self::assertSame($cached . '/libcached.so', $resolver->resolve('libcached.so', Bitness::Auto));
+        self::assertSame($other . '/libother.so', $resolver->resolve('libother.so', Bitness::Auto));
+    }
+
+    public function testMissingLinkerCacheIsIgnored(): void
+    {
+        $this->setEnvironment('LD_LIBRARY_PATH', null);
+        $resolver = new LinuxPathResolver($this->createDirectory() . '/missing');
+
+        self::assertNull($resolver->resolve('libcached-' . \bin2hex(\random_bytes(4)) . '.so', Bitness::Auto));
     }
 }
