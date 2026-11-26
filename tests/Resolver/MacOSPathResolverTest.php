@@ -78,12 +78,4 @@ final class MacOSPathResolverTest extends TestCase
 
         self::assertNull((new MacOSPathResolver())->resolve($name, Bitness::Auto));
     }
-
-    /**
-     * A Mach-O file of the bitness of the PHP process.
-     */
-    private static function getNativeMachO(): string
-    {
-        return (\PHP_INT_SIZE === 8 ? "\xCF\xFA\xED\xFE" : "\xCE\xFA\xED\xFE") . \str_repeat("\0", 28);
-    }
 }

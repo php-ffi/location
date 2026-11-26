@@ -109,4 +109,24 @@ abstract class TestCase extends BaseTestCase
     {
         return self::getPe(\PHP_INT_SIZE === 8 ? 0x8664 : 0x014C);
     }
+
+    /**
+     * The Mach-O file of the bitness of the PHP process.
+     */
+    protected static function getNativeMachO(): string
+    {
+        return (\PHP_INT_SIZE === 8 ? "\xCF\xFA\xED\xFE" : "\xCE\xFA\xED\xFE") . \str_repeat("\0", 28);
+    }
+
+    /**
+     * A library in the format of the current operating system and the bitness of the PHP process.
+     */
+    protected static function getNativeLibrary(): string
+    {
+        return match (\PHP_OS_FAMILY) {
+            'Windows' => self::getNativePe(),
+            'Darwin' => self::getNativeMachO(),
+            default => self::getNativeElf(),
+        };
+    }
 }

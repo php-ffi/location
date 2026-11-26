@@ -44,9 +44,10 @@ final class LocatorTest extends TestCase
     public function testResolveReturnsTheFirstFoundLibrary(): void
     {
         $directory = $this->createDirectory();
-        $library = \PHP_OS_FAMILY === 'Windows'
-            ? $this->createFile($directory . '\\b.dll', self::getNativePe())
-            : $this->createFile($directory . '/libb.so', self::getNativeElf());
+        $library = $this->createFile(
+            $directory . \DIRECTORY_SEPARATOR . (\PHP_OS_FAMILY === 'Windows' ? 'b.dll' : 'libb.so'),
+            self::getNativeLibrary(),
+        );
 
         self::assertSame($library, Locator::resolve($directory . '/missing', $library));
         self::assertNull(Locator::resolve($directory . '/missing'));
